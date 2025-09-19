@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Text, TextInput, TouchableOpacity, View, ActivityIndicator } from "react-native";
 import { useSignUp } from "@clerk/clerk-expo";
-import { Link, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import { styles } from "@/assets/styles/auth.styles.js";
 import { Ionicons } from "@expo/vector-icons";
 import { COLORS } from "../../constants/colors";
@@ -17,59 +17,55 @@ export default function SignUpScreen() {
   const [pendingVerification, setPendingVerification] = useState(false);
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  // Handle submission of sign-up form
   const onSignUpPress = async () => {
     if (!isLoaded) return;
 
-    // Start sign-up process using email and password provided
+    setLoading(true);
+    setError("");
     try {
       await signUp.create({
         emailAddress,
         password,
       });
-
-      // Send user an email with verification code
       await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
-
-      // Set 'pendingVerification' to true to display second form
-      // and capture OTP code
       setPendingVerification(true);
     } catch (err) {
-      if(err.errors?.[0]?.code === "form_identifier_exists"){
-        setError("That email address is already in use. Please try another.")
-      }else{
-        setError("An error occurred. Please try again.")
+      if (err.errors?.[0]?.code === "form_identifier_exists") {
+        setError("That email address is already in use. Please try another.");
+      } else {
+        setError("An error occurred. Please try again.");
       }
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Handle submission of verification form
   const onVerifyPress = async () => {
     if (!isLoaded) return;
 
+    setLoading(true);
+    setError("");
     try {
-      // Use the code the user provided to attempt verification
       const signUpAttempt = await signUp.attemptEmailAddressVerification({
         code,
       });
 
-      // If verification was completed, set the session to active
-      // and redirect the user
       if (signUpAttempt.status === "complete") {
         await setActive({ session: signUpAttempt.createdSessionId });
         router.replace("/");
       } else {
-        // If the status is not complete, check why. User may need to
-        // complete further steps.
         console.error(JSON.stringify(signUpAttempt, null, 2));
       }
     } catch (err) {
-      if(err.errors?.[0]?.code === "form_code_incorrect"){
-        setError("Incorrect code")
-      }else{
-        setError("An error occurred. Please try again.")
+      if (err.errors?.[0]?.code === "form_code_incorrect") {
+        setError("Incorrect code");
+      } else {
+        setError("An error occurred. Please try again.");
       }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -92,8 +88,12 @@ export default function SignUpScreen() {
           placeholder="Enter your verification code"
           onChangeText={(code) => setCode(code)}
         />
-        <TouchableOpacity style={styles.button} onPress={onVerifyPress}>
-          <Text style={styles.buttonText}>Verify</Text>
+        <TouchableOpacity style={styles.button} onPress={onVerifyPress} disabled={loading}>
+          {loading ? (
+            <ActivityIndicator size="small" color="#fff" />
+          ) : (
+            <Text style={styles.buttonText}>Verify</Text>
+          )}
         </TouchableOpacity>
       </View>
     );
@@ -137,8 +137,12 @@ export default function SignUpScreen() {
           secureTextEntry={true}
           onChangeText={(password) => setPassword(password)}
         />
-        <TouchableOpacity style={styles.button} onPress={onSignUpPress}>
-          <Text style={styles.buttonText}>Continue</Text>
+        <TouchableOpacity style={styles.button} onPress={onSignUpPress} disabled={loading}>
+          {loading ? (
+            <ActivityIndicator size="small" color="#fff" />
+          ) : (
+            <Text style={styles.buttonText}>Continue</Text>
+          )}
         </TouchableOpacity>
 
         <View style={styles.footerContainer}>
