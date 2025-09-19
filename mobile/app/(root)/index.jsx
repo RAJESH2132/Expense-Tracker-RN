@@ -5,13 +5,13 @@ import { SignOutButton } from "@/components/SignOutButton";
 import { useTransactions } from "@/hooks/useTransactions";
 import PageLoader from "@/components/PageLoader";
 import { useEffect } from "react";
-import {styles} from "@/assets/styles/home.styles"
-import {Ionicons} from "@expo/vector-icons"
-
+import { styles } from "@/assets/styles/home.styles";
+import { Ionicons } from "@expo/vector-icons";
+import BalanceCard from "@/components/BalanceCard";
 
 export default function Page() {
   const { user } = useUser();
-  const router = useRouter()
+  const router = useRouter();
 
   const { transactions, summary, isLoading, loadData, deleteTransaction } =
     useTransactions(user.id);
@@ -27,10 +27,10 @@ export default function Page() {
       <View style={styles.content}>
         <View style={styles.header}>
           <View style={styles.headerLeft}>
-            <Image 
-            source={require("@/assets/images/logo.png")}
-            style={styles.headerLogo}
-            resizeMode="contain"
+            <Image
+              source={require("@/assets/images/logo.png")}
+              style={styles.headerLogo}
+              resizeMode="contain"
             />
             <View style={styles.welcomeContainer}>
               <Text style={styles.welcomeText}>Welcome,</Text>
@@ -40,12 +40,20 @@ export default function Page() {
             </View>
           </View>
           <View style={styles.headerRight}>
-            <TouchableOpacity style={styles.addButton} onPress={()=>router.push("/create")}>
+            <TouchableOpacity
+              style={styles.addButton}
+              onPress={() => router.push("/create")}
+            >
               <Ionicons name="add" size={20} color="#FFF" />
               <Text style={styles.addButtonText}>Add</Text>
             </TouchableOpacity>
             <SignOutButton />
           </View>
+        </View>
+        <BalanceCard summary={summary} />
+
+        <View style={styles.transactionsHeaderContainer}>
+          <Text style={styles.sectionTitle}>Recent Transactions</Text>
         </View>
       </View>
     </View>
