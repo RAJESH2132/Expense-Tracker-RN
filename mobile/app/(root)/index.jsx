@@ -24,8 +24,9 @@ export default function Page() {
   const router = useRouter();
   const [refreshing, setRefreshing] = useState(false);
 
-  const { transactions, summary, isLoading, loadData, deleteTransaction } =
-    useTransactions(user.id);
+  const { transactions, summary, isLoading, loadData, deleteTransaction } = useTransactions(
+    user.id
+  );
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -38,18 +39,10 @@ export default function Page() {
   }, [loadData]);
 
   const handleDelete = (id) => {
-    Alert.alert(
-      "Delete Transaction",
-      "Are you sure you want to delete this transaction?",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: () => deleteTransaction(id),
-        },
-      ]
-    );
+    Alert.alert("Delete Transaction", "Are you sure you want to delete this transaction?", [
+      { text: "Cancel", style: "cancel" },
+      { text: "Delete", style: "destructive", onPress: () => deleteTransaction(id) },
+    ]);
   };
 
   if (isLoading && !refreshing) return <PageLoader />;
@@ -57,10 +50,12 @@ export default function Page() {
   return (
     <View style={styles.container}>
       <View style={styles.content}>
+        {/* HEADER */}
         <View style={styles.header}>
+          {/* LEFT */}
           <View style={styles.headerLeft}>
             <Image
-              source={require("@/assets/images/logo.png")}
+              source={require("../../assets/images/logo.png")}
               style={styles.headerLogo}
               resizeMode="contain"
             />
@@ -71,17 +66,16 @@ export default function Page() {
               </Text>
             </View>
           </View>
+          {/* RIGHT */}
           <View style={styles.headerRight}>
-            <TouchableOpacity
-              style={styles.addButton}
-              onPress={() => router.push("/create")}
-            >
+            <TouchableOpacity style={styles.addButton} onPress={() => router.push("/create")}>
               <Ionicons name="add" size={20} color="#FFF" />
               <Text style={styles.addButtonText}>Add</Text>
             </TouchableOpacity>
             <SignOutButton />
           </View>
         </View>
+
         <BalanceCard summary={summary} />
 
         <View style={styles.transactionsHeaderContainer}>
@@ -89,18 +83,16 @@ export default function Page() {
         </View>
       </View>
 
+      {/* FlatList is a performant way to render long lists in React Native. */}
+      {/* it renders items lazily — only those on the screen. */}
       <FlatList
         style={styles.transactionsList}
         contentContainerStyle={styles.transactionsListContent}
         data={transactions}
-        renderItem={({ item }) => (
-          <TransactionItem item={item} onDelete={handleDelete} />
-        )}
+        renderItem={({ item }) => <TransactionItem item={item} onDelete={handleDelete} />}
         ListEmptyComponent={<NoTransactionsFound />}
         showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       />
     </View>
   );

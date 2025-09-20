@@ -1,8 +1,6 @@
 import { useCallback, useState } from "react";
 import { Alert } from "react-native";
-
-// const API_URL = "https://expense-tracker-7vc6.onrender.com/api";
-const API_URL = "http://192.168.1.2:5001/api";
+import { API_URL } from "../constants/api";
 
 export const useTransactions = (userId) => {
   const [transactions, setTransactions] = useState([]);
@@ -40,7 +38,7 @@ export const useTransactions = (userId) => {
     try {
       await Promise.all([fetchTransactions(), fetchSummary()]);
     } catch (error) {
-      console.error("Error loading data", error);
+      console.error("Error loading data:", error);
     } finally {
       setIsLoading(false);
     }
@@ -48,24 +46,16 @@ export const useTransactions = (userId) => {
 
   const deleteTransaction = async (id) => {
     try {
-      const response = await fetch(`${API_URL}/transactions/${id}`, {
-        method: "DELETE",
-      });
+      const response = await fetch(`${API_URL}/transactions/${id}`, { method: "DELETE" });
       if (!response.ok) throw new Error("Failed to delete transaction");
 
       loadData();
-      Alert.alert("Success", "Transactio deleted successfully");
+      Alert.alert("Success", "Transaction deleted successfully");
     } catch (error) {
       console.error("Error deleting transaction:", error);
-      Alert.alert("Error, error.message");
+      Alert.alert("Error", error.message);
     }
   };
 
-  return {
-    transactions,
-    summary,
-    isLoading,
-    loadData,
-    deleteTransaction,
-  };
+  return { transactions, summary, isLoading, loadData, deleteTransaction };
 };
